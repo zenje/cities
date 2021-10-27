@@ -22,40 +22,45 @@ const getCities = async (setCities) => {
   for (let line of cityLines) {
     let columns = line.split("\t");
     if (columns) {
-      let city = columns[2]; // asciiname, name of geographical point in plain ascii characters, varchar(200)
+      // asciiname, name of geographical point in plain ascii characters
+      let city = columns[2];
       cities[city] = columns;
     }
   }
-  setCities(cities);
   return cities;
 };
 
 const getMarkers = (setMarkers, cities) => {
-  let markers = [];
   if (cities) {
-    let markers = Object.values(cities).filter((city) => city[14] > 1000000);
-    setMarkers(markers);
+    setMarkers(Object.values(cities));
   }
-  return markers;
 };
 
-const renderMarkers = (markers) => {
+const renderMarkers = (markers, scale) => {
+  const getCircle = (population) => {
+    let radius = Math.sqrt(population / Math.PI) / 200;
+    return <circle r={`${radius}px`} fill="#F53" fillOpacity="0.5" />;
+  };
+
   if (markers) {
-    //console.log('MARKERS', markers);
+    markers = markers.filter((city) => city[14] > 1000000 / scale);
     return markers.map((marker, index) => (
       <Marker key={index} coordinates={[marker[5], marker[4]]}>
-        <circle r={3} fill="#F53" />
+        {getCircle(marker[14])}
       </Marker>
     ));
   }
 };
 
 const WorldMap = ({ markers }) => {
+  let [scale, setScale] = useState(1);
   return (
     <div>
       <ComposableMap>
         <ZoomableGroup
           onMoveEnd={(...args) => {
+            console.log("ARGS", args);
+            setScale(args[0].zoom);
             //console.log("ARGS", args);
           }}
         >
@@ -73,7 +78,7 @@ const WorldMap = ({ markers }) => {
               })
             }
           </Geographies>
-          {renderMarkers(markers)}
+          {renderMarkers(markers, scale)}
         </ZoomableGroup>
       </ComposableMap>
     </div>
@@ -81,16 +86,15 @@ const WorldMap = ({ markers }) => {
 };
 
 function App() {
-  let [cities, setCities] = useState(undefined);
   let [markers, setMarkers] = useState([]);
 
   useEffect(() => {
-    getCities(setCities);
+    // useEffect is synchronous, call async function within useEffect to fetch data
+    (async () => {
+      let cities = await getCities();
+      getMarkers(setMarkers, cities);
+    })();
   }, []);
-
-  useEffect(() => {
-    getMarkers(setMarkers, cities);
-  }, [cities]);
 
   return (
     <div className="App">
