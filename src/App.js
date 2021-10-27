@@ -36,19 +36,75 @@ const getMarkers = (setMarkers, cities) => {
   }
 };
 
-const renderMarkers = (markers, scale) => {
-  const getCircle = (population) => {
-    let radius = Math.sqrt(population / Math.PI) / 200;
-    return <circle r={`${radius}px`} fill="#F53" fillOpacity="0.5" />;
+const CityMarker = ({ coordinates, name, population, scale }) => {
+  const getRadius = (population) => Math.sqrt(population / Math.PI) / 200;
+  const getColor = (population) => {
+    const colors = [
+      "#10497E",
+      "#1D7387",
+      "#2A9D8F",
+      "#F4A261",
+      "#E76F51",
+      "#E64C70",
+      "#EE8959",
+    ];
+    let index = 0;
+    if (population >= 10000000) {
+      index = 0;
+    } else if (population >= 5000000) {
+      index = 1;
+    } else if (population >= 2000000) {
+      index = 2;
+    } else if (population >= 1000000) {
+      index = 3;
+    } else if (population >= 500000) {
+      index = 4;
+    } else if (population >= 200000) {
+      index = 5;
+    } else {
+      index = 6;
+    }
+    return colors[index];
   };
 
+  const initialRadius = getRadius(population);
+  const hoveredRadius = initialRadius * 2;
+  let [radius, setRadius] = useState(initialRadius);
+  const isVisible = population > 1000000 / scale;
+  const opacity = isVisible ? "0.7" : "0";
+  const color = getColor(population);
+  return (
+    <Marker coordinates={coordinates}>
+      <circle
+        r={`${radius}px`}
+        fill={color}
+        fillOpacity={opacity}
+        style={{ transition: "0.2s ease-in-out" }}
+        onMouseEnter={() => {
+          setRadius(hoveredRadius);
+          console.log(name + " " + population);
+        }}
+        onMouseLeave={() => {
+          setRadius(initialRadius);
+        }}
+      />
+    </Marker>
+  );
+};
+
+const renderMarkers = (markers, scale) => {
   if (markers) {
-    markers = markers.filter((city) => city[14] > 1000000 / scale);
-    return markers.map((marker, index) => (
-      <Marker key={index} coordinates={[marker[5], marker[4]]}>
-        {getCircle(marker[14])}
-      </Marker>
-    ));
+    return markers
+      .filter((marker) => marker[14] >= 50000)
+      .map((marker, index) => (
+        <CityMarker
+          key={index}
+          name={marker[2]}
+          population={marker[14]}
+          coordinates={[marker[5], marker[4]]}
+          scale={scale}
+        />
+      ));
   }
 };
 
@@ -71,8 +127,10 @@ const WorldMap = ({ markers }) => {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill={"lightblue"}
-                    stroke={"white"}
+                    fill="lightblue"
+                    stroke="white"
+                    strokeWidth="1px"
+                    strokeLinecap="round"
                   />
                 );
               })
