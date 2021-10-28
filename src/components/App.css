@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+.city-marker-enter {
+  opacity: 0.01;
+}
+
+.city-marker-enter.city-marker-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.city-marker-exit {
+  opacity: 1;
+}
+
+.city-marker-exit.city-marker-exit-active {
+  opacity: 0.01;
+  transition: opacity 500ms ease-in;
+}
