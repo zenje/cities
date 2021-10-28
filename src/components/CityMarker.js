@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Marker } from "react-simple-maps";
 
-const MARKER_OPACITY = "0.7";
+const FILL_OPACITY = 0.3;
+const STROKE_WIDTH = "0.5";
 const getRadius = (population) => Math.sqrt(population / Math.PI) / 200;
 const getColor = (population) => {
   const COLORS = [
@@ -62,7 +63,9 @@ const CityMarker = ({ coordinates, name, population, setTooltipContent }) => {
       <circle
         r={`${radius}px`}
         fill={color}
-        fillOpacity={MARKER_OPACITY}
+        fillOpacity={FILL_OPACITY}
+        stroke={color}
+        strokeWidth={STROKE_WIDTH}
         style={{ transition: "0.2s ease-in-out" }}
         onMouseEnter={() => {
           setTooltipContent(name + " " + nFormatter(population, 1));

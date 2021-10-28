@@ -131,8 +131,8 @@ const WorldMap = () => {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill="lightblue"
-                    stroke="white"
+                    fill="rgb(0,0,0,0)"
+                    stroke="rgb(256,256,256,0.5)"
                     strokeWidth="0.5"
                     strokeLinecap="round"
                     style={{
