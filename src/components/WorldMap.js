@@ -12,6 +12,15 @@ import CityMarker from "./CityMarker";
 import GEO_JSON from "../data/world-110m.json";
 import CITY_DATA from "../data/cities15000.txt";
 
+class CityInfo {
+  constructor(id, name, population, coordinates) {
+    this.id = id;
+    this.name = name;
+    this.population = population;
+    this.coordinates = coordinates;
+  }
+}
+
 const getCities = async (setCities) => {
   let cityLines = await fetch(CITY_DATA)
     .then((r) => r.text())
@@ -23,7 +32,10 @@ const getCities = async (setCities) => {
     if (columns) {
       // asciiname, name of geographical point in plain ascii characters
       let city = columns[2];
-      cities[city] = columns;
+      cities[city] = new CityInfo(columns[0], columns[1], columns[14], [
+        columns[5],
+        columns[4],
+      ]);
     }
   }
   return cities;
@@ -32,35 +44,62 @@ const getCities = async (setCities) => {
 const getMarkers = (setMarkers, cities) => {
   if (cities) {
     // filter out cities with population < 50000 to optimize rendering
-    let markers = Object.values(cities).filter((marker) => marker[14] >= 50000);
+    let markers = Object.values(cities).filter(
+      (city) => city.population >= 50000
+    );
     setMarkers(markers);
   }
 };
 
-const renderMarkers = (markers, scale, setTooltipContent) => {
+const renderMarkers = (
+  markers,
+  scale,
+  setTooltipContent,
+  withTransition = false
+) => {
   if (markers) {
-    return (
-      <TransitionGroup component={null}>
-        {markers
-          .filter((marker) => marker[14] > 1000000 / scale)
-          .map((marker) => (
-            <CSSTransition
-              key={marker[0]}
-              classNames="city-marker"
-              timeout={500}
-            >
+    if (withTransition) {
+      // transitions are non-performant, make withTransition = false for now
+      return (
+        <TransitionGroup component={null}>
+          {markers
+            .filter((city) => city.population > 1000000 / scale)
+            .map((city) => (
+              <CSSTransition
+                key={city.id}
+                classNames="city-marker"
+                timeout={500}
+              >
+                <CityMarker
+                  key={city.id}
+                  name={city.name}
+                  population={city.population}
+                  coordinates={city.coordinates}
+                  scale={scale}
+                  setTooltipContent={setTooltipContent}
+                />
+              </CSSTransition>
+            ))}
+        </TransitionGroup>
+      );
+    } else {
+      return (
+        <>
+          {markers
+            .filter((city) => city.population > 1000000 / scale)
+            .map((city) => (
               <CityMarker
-                key={marker[0]}
-                name={marker[2]}
-                population={marker[14]}
-                coordinates={[marker[5], marker[4]]}
+                key={city.id}
+                name={city.name}
+                population={city.population}
+                coordinates={city.coordinates}
                 scale={scale}
                 setTooltipContent={setTooltipContent}
               />
-            </CSSTransition>
-          ))}
-      </TransitionGroup>
-    );
+            ))}
+        </>
+      );
+    }
   }
 };
 
@@ -70,7 +109,7 @@ const WorldMap = () => {
   let [tooltipContent, setTooltipContent] = useState("");
 
   useEffect(() => {
-    // useEffect is synchronous, call async function within useEffect to fetch data
+    // useEffect is synchronous, call async function within useEffect to fetch
     (async () => {
       let cities = await getCities();
       getMarkers(setMarkers, cities);
@@ -78,12 +117,11 @@ const WorldMap = () => {
   }, []);
 
   return (
-    <div>
-      <ComposableMap data-tip="">
+    <div data-tip="">
+      <ComposableMap>
         <ZoomableGroup
           onMoveEnd={(...args) => {
             setScale(args[0].zoom);
-            //console.log("ARGS", args);
           }}
         >
           <Geographies geography={GEO_JSON}>
@@ -95,8 +133,14 @@ const WorldMap = () => {
                     geography={geo}
                     fill="lightblue"
                     stroke="white"
-                    strokeWidth="1px"
+                    strokeWidth="0.5"
                     strokeLinecap="round"
+                    style={{
+                      default: { outline: "none" },
+                      hover: { outline: "none" },
+                      pressed: { outline: "none" },
+                    }}
+                    tabIndex={-1}
                   />
                 );
               })

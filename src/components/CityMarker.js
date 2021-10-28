@@ -32,13 +32,7 @@ const getColor = (population) => {
   return COLORS[index];
 };
 
-const CityMarker = ({
-  coordinates,
-  name,
-  population,
-  scale,
-  setTooltipContent,
-}) => {
+const CityMarker = ({ coordinates, name, population, setTooltipContent }) => {
   const initialRadius = getRadius(population);
   const hoveredRadius = initialRadius * 2;
   let [radius, setRadius] = useState(initialRadius);
