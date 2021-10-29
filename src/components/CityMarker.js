@@ -53,7 +53,8 @@ const nFormatter = (num, digits) => {
     : "0";
 };
 
-const CityMarker = ({ coordinates, name, population, setTooltipContent }) => {
+const CityMarker = ({ info, setTooltipContent }) => {
+  const { coordinates, country, displayName, name, population } = info;
   const initialRadius = getRadius(population);
   const hoveredRadius = initialRadius * 2;
   let [radius, setRadius] = useState(initialRadius);
@@ -68,7 +69,9 @@ const CityMarker = ({ coordinates, name, population, setTooltipContent }) => {
         strokeWidth={STROKE_WIDTH}
         style={{ transition: "0.2s ease-in-out" }}
         onMouseEnter={() => {
-          setTooltipContent(name + " " + nFormatter(population, 1));
+          setTooltipContent(
+            displayName + ", " + country + " " + nFormatter(population, 1)
+          );
           setRadius(hoveredRadius);
         }}
         onMouseLeave={() => {

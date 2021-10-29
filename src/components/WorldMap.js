@@ -7,39 +7,10 @@ import {
 } from "react-simple-maps";
 import ReactTooltip from "react-tooltip";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { CityInfo, CityFetcher } from "../utils/fetchCities";
 
 import CityMarker from "./CityMarker";
 import GEO_JSON from "../data/world-110m.json";
-import CITY_DATA from "../data/cities15000.txt";
-
-class CityInfo {
-  constructor(id, name, population, coordinates) {
-    this.id = id;
-    this.name = name;
-    this.population = population;
-    this.coordinates = coordinates;
-  }
-}
-
-const getCities = async (setCities) => {
-  let cityLines = await fetch(CITY_DATA)
-    .then((r) => r.text())
-    .then((text) => text.split(/\n/));
-
-  let cities = {};
-  for (let line of cityLines) {
-    let columns = line.split("\t");
-    if (columns) {
-      // asciiname, name of geographical point in plain ascii characters
-      let city = columns[2];
-      cities[city] = new CityInfo(columns[0], columns[1], columns[14], [
-        columns[5],
-        columns[4],
-      ]);
-    }
-  }
-  return cities;
-};
 
 const getMarkers = (setMarkers, cities) => {
   if (cities) {
@@ -72,9 +43,7 @@ const renderMarkers = (
               >
                 <CityMarker
                   key={city.id}
-                  name={city.name}
-                  population={city.population}
-                  coordinates={city.coordinates}
+                  info={city}
                   scale={scale}
                   setTooltipContent={setTooltipContent}
                 />
@@ -90,9 +59,7 @@ const renderMarkers = (
             .map((city) => (
               <CityMarker
                 key={city.id}
-                name={city.name}
-                population={city.population}
-                coordinates={city.coordinates}
+                info={city}
                 scale={scale}
                 setTooltipContent={setTooltipContent}
               />
@@ -111,7 +78,7 @@ const WorldMap = () => {
   useEffect(() => {
     // useEffect is synchronous, call async function within useEffect to fetch
     (async () => {
-      let cities = await getCities();
+      let cities = await CityFetcher.get();
       getMarkers(setMarkers, cities);
     })();
   }, []);
