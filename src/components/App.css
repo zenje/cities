@@ -1,21 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300;400;600;700&display=swap");
+
+body {
+  font-family: "Overpass Mono", monospace;
+  background-color: #282c34;
+}
+
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,16 +15,18 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.world-map {
+  width: 100%;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@media screen and (max-width: 768px) {
+  .world-map {
+    width: calc(2 * 100vh);
   }
-  to {
-    transform: rotate(360deg);
+}
+@media screen and (max-width: 480px) {
+  .world-map {
+    width: calc(3 * 100vh);
   }
 }
 

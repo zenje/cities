@@ -94,6 +94,7 @@ const WorldMap = () => {
           <Geographies geography={GEO_JSON}>
             {({ geographies }) =>
               geographies.map((geo) => {
+                console.log(geo);
                 return (
                   <Geography
                     key={geo.rsmKey}
@@ -116,7 +117,9 @@ const WorldMap = () => {
           {renderMarkers(markers, scale, setTooltipContent)}
         </ZoomableGroup>
       </ComposableMap>
-      <ReactTooltip>{tooltipContent}</ReactTooltip>
+      <ReactTooltip multiline={true} html={true}>
+        {tooltipContent}
+      </ReactTooltip>
     </div>
   );
 };

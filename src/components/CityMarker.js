@@ -70,7 +70,7 @@ const CityMarker = ({ info, setTooltipContent }) => {
         style={{ transition: "0.2s ease-in-out" }}
         onMouseEnter={() => {
           setTooltipContent(
-            displayName + ", " + country + " " + nFormatter(population, 1)
+            `${displayName}, ${country}<br />${nFormatter(population, 1)}`
           );
           setRadius(hoveredRadius);
         }}
