@@ -53,8 +53,8 @@ const nFormatter = (num, digits) => {
     : "0";
 };
 
-const CityMarker = ({ info, setTooltipContent, setIsModalOpen }) => {
-  const { coordinates, country, displayName, name, population } = info;
+const CityMarker = ({ info, setTooltipContent, openModal }) => {
+  const { coordinates, country, displayName, population } = info;
   const initialRadius = getRadius(population);
   const hoveredRadius = initialRadius * 2;
   let [radius, setRadius] = useState(initialRadius);
@@ -80,7 +80,7 @@ const CityMarker = ({ info, setTooltipContent, setIsModalOpen }) => {
           setRadius(initialRadius);
         }}
         onClick={() => {
-          setIsModalOpen(true);
+          openModal(info);
         }}
       />
     </Marker>

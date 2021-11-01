@@ -6,12 +6,12 @@ import {
   Geography,
 } from "react-simple-maps";
 import ReactTooltip from "react-tooltip";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { CityFetcher } from "../utils/fetchCities";
+import { CityExtractFetcher } from "../utils/fetchCityExtract";
 
 import CityMarker from "./CityMarker";
+import CityModal from "./CityModal";
 import GEO_JSON from "../data/world-110m.json";
 
 const getMarkers = (setMarkers, cities) => {
@@ -28,7 +28,7 @@ const renderMarkers = (
   markers,
   scale,
   setTooltipContent,
-  setIsModalOpen,
+  openModal,
   withTransition = false
 ) => {
   if (markers) {
@@ -49,7 +49,7 @@ const renderMarkers = (
                   info={city}
                   scale={scale}
                   setTooltipContent={setTooltipContent}
-                  setIsModalOpen={setIsModalOpen}
+                  openModal={openModal}
                 />
               </CSSTransition>
             ))}
@@ -66,7 +66,7 @@ const renderMarkers = (
                 info={city}
                 scale={scale}
                 setTooltipContent={setTooltipContent}
-                setIsModalOpen={setIsModalOpen}
+                openModal={openModal}
               />
             ))}
         </>
@@ -75,41 +75,46 @@ const renderMarkers = (
   }
 };
 
-function MyVerticallyCenteredModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="lg"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
-      <Modal.Header closeButton closeVariant="white">
-        <Modal.Title id="contained-modal-title-vcenter">
-          Modal heading
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <h4>Centered Modal</h4>
-        <p>
-          Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-          dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
-          consectetur ac, vestibulum at eros.
-        </p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="light" onClick={props.onHide}>
-          Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
+// wrap Geographies in a memoized component to prevent re-render after other
+// state changes (e.g., loading tooltip (setTooltipContent), zooming (setScale))
+const MemoGeographies = memo(() => (
+  <Geographies geography={GEO_JSON}>
+    {({ geographies }) =>
+      geographies.map((geo) => {
+        console.log(geo);
+        return (
+          <Geography
+            key={geo.rsmKey}
+            geography={geo}
+            fill="rgb(0,0,0,0)"
+            stroke="rgb(256,256,256,0.5)"
+            strokeWidth="0.5"
+            strokeLinecap="round"
+            style={{
+              default: { outline: "none" },
+              hover: { outline: "none" },
+              pressed: { outline: "none" },
+            }}
+            tabIndex={-1}
+          />
+        );
+      })
+    }
+  </Geographies>
+));
 
 const WorldMap = () => {
   let [markers, setMarkers] = useState([]);
   let [scale, setScale] = useState(1);
   let [tooltipContent, setTooltipContent] = useState("");
   let [isModalOpen, setIsModalOpen] = useState(false);
+  let [modalContent, setModalContent] = useState({});
+
+  const openModal = async (cityInfo) => {
+    const extract = await CityExtractFetcher.get(cityInfo);
+    setModalContent({ header: cityInfo.displayName, extract });
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     // useEffect is synchronous, call async function within useEffect to fetch
@@ -127,36 +132,16 @@ const WorldMap = () => {
             setScale(args[0].zoom);
           }}
         >
-          <Geographies geography={GEO_JSON}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                console.log(geo);
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill="rgb(0,0,0,0)"
-                    stroke="rgb(256,256,256,0.5)"
-                    strokeWidth="0.5"
-                    strokeLinecap="round"
-                    style={{
-                      default: { outline: "none" },
-                      hover: { outline: "none" },
-                      pressed: { outline: "none" },
-                    }}
-                    tabIndex={-1}
-                  />
-                );
-              })
-            }
-          </Geographies>
-          {renderMarkers(markers, scale, setTooltipContent, setIsModalOpen)}
+          <MemoGeographies />
+          {renderMarkers(markers, scale, setTooltipContent, openModal)}
         </ZoomableGroup>
       </ComposableMap>
       <ReactTooltip className="city-tooltip" multiline={true} html={true}>
         {tooltipContent}
       </ReactTooltip>
-      <MyVerticallyCenteredModal
+      <CityModal
+        header={modalContent.header}
+        extract={modalContent.extract}
         show={isModalOpen}
         onHide={() => setIsModalOpen(false)}
       />
