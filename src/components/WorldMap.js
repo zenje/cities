@@ -6,8 +6,10 @@ import {
   Geography,
 } from "react-simple-maps";
 import ReactTooltip from "react-tooltip";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import { CityInfo, CityFetcher } from "../utils/fetchCities";
+import { CityFetcher } from "../utils/fetchCities";
 
 import CityMarker from "./CityMarker";
 import GEO_JSON from "../data/world-110m.json";
@@ -26,6 +28,7 @@ const renderMarkers = (
   markers,
   scale,
   setTooltipContent,
+  setIsModalOpen,
   withTransition = false
 ) => {
   if (markers) {
@@ -46,6 +49,7 @@ const renderMarkers = (
                   info={city}
                   scale={scale}
                   setTooltipContent={setTooltipContent}
+                  setIsModalOpen={setIsModalOpen}
                 />
               </CSSTransition>
             ))}
@@ -62,6 +66,7 @@ const renderMarkers = (
                 info={city}
                 scale={scale}
                 setTooltipContent={setTooltipContent}
+                setIsModalOpen={setIsModalOpen}
               />
             ))}
         </>
@@ -70,10 +75,41 @@ const renderMarkers = (
   }
 };
 
+function MyVerticallyCenteredModal(props) {
+  return (
+    <Modal
+      {...props}
+      size="lg"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton closeVariant="white">
+        <Modal.Title id="contained-modal-title-vcenter">
+          Modal heading
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <h4>Centered Modal</h4>
+        <p>
+          Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
+          dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
+          consectetur ac, vestibulum at eros.
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="light" onClick={props.onHide}>
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
 const WorldMap = () => {
   let [markers, setMarkers] = useState([]);
   let [scale, setScale] = useState(1);
   let [tooltipContent, setTooltipContent] = useState("");
+  let [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // useEffect is synchronous, call async function within useEffect to fetch
@@ -114,12 +150,16 @@ const WorldMap = () => {
               })
             }
           </Geographies>
-          {renderMarkers(markers, scale, setTooltipContent)}
+          {renderMarkers(markers, scale, setTooltipContent, setIsModalOpen)}
         </ZoomableGroup>
       </ComposableMap>
-      <ReactTooltip multiline={true} html={true}>
+      <ReactTooltip className="city-tooltip" multiline={true} html={true}>
         {tooltipContent}
       </ReactTooltip>
+      <MyVerticallyCenteredModal
+        show={isModalOpen}
+        onHide={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

@@ -53,7 +53,7 @@ const nFormatter = (num, digits) => {
     : "0";
 };
 
-const CityMarker = ({ info, setTooltipContent }) => {
+const CityMarker = ({ info, setTooltipContent, setIsModalOpen }) => {
   const { coordinates, country, displayName, name, population } = info;
   const initialRadius = getRadius(population);
   const hoveredRadius = initialRadius * 2;
@@ -62,6 +62,7 @@ const CityMarker = ({ info, setTooltipContent }) => {
   return (
     <Marker coordinates={coordinates}>
       <circle
+        className="city-circle"
         r={`${radius}px`}
         fill={color}
         fillOpacity={FILL_OPACITY}
@@ -77,6 +78,9 @@ const CityMarker = ({ info, setTooltipContent }) => {
         onMouseLeave={() => {
           setTooltipContent("");
           setRadius(initialRadius);
+        }}
+        onClick={() => {
+          setIsModalOpen(true);
         }}
       />
     </Marker>

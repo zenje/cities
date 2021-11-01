@@ -1,8 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300;400;600;700&display=swap");
 
+:root {
+  --bg-color-main: #1e2130;
+  --bg-color-secondary: #171a24;
+
+  --font-color: rgb(256, 256, 256, 0.8);
+}
+
 body {
   font-family: "Overpass Mono", monospace;
-  background-color: #282c34;
+  background-color: var(--bg-color-main);
 }
 
 .App {
@@ -12,7 +19,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--font-color);
 }
 
 .world-map {
@@ -28,6 +35,20 @@ body {
   .world-map {
     width: calc(3 * 100vh);
   }
+}
+
+.modal-content {
+  background-color: var(--bg-color-secondary);
+  opacity: 0.9;
+  color: var(--font-color);
+}
+
+.city-tooltip {
+  background-color: var(--bg-color-secondary) !important;
+}
+
+.city-circle {
+  cursor: pointer;
 }
 
 .city-marker-enter {
