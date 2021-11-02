@@ -112,7 +112,11 @@ const WorldMap = () => {
 
   const openModal = async (cityInfo) => {
     const extract = await CityExtractFetcher.get(cityInfo);
-    setModalContent({ header: cityInfo.displayName, extract });
+    const header =
+      cityInfo.displayName !== cityInfo.adminRegion
+        ? `${cityInfo.displayName}, ${cityInfo.adminRegion}`
+        : `${cityInfo.displayName}, ${cityInfo.country}`;
+    setModalContent({ header, extract });
     setIsModalOpen(true);
   };
 

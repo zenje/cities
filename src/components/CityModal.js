@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
 const CityModal = (props) => {
-  const { header, extract } = props;
+  const { header, extract, showButton } = props;
   return (
     <Modal
       {...props}
@@ -14,14 +14,14 @@ const CityModal = (props) => {
       <Modal.Header closeButton closeVariant="white">
         <Modal.Title id="contained-modal-title-vcenter">{header}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <p>{extract}</p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="light" onClick={props.onHide}>
-          Close
-        </Button>
-      </Modal.Footer>
+      <Modal.Body>{extract}</Modal.Body>
+      {showButton && (
+        <Modal.Footer>
+          <Button variant="light" onClick={props.onHide}>
+            Close
+          </Button>
+        </Modal.Footer>
+      )}
     </Modal>
   );
 };
