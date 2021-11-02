@@ -9,6 +9,7 @@ class CityInfo {
     displayName, // name with special chars included
     population,
     coordinates,
+    countryCode,
     country,
     adminRegion
   ) {
@@ -17,6 +18,7 @@ class CityInfo {
     this.displayName = displayName;
     this.population = population;
     this.coordinates = coordinates;
+    this.countryCode = countryCode;
     this.country = country;
     this.adminRegion = adminRegion;
   }
@@ -60,6 +62,7 @@ class CityFetcher {
           columns[1],
           columns[14],
           [columns[5], columns[4]],
+          columns[8],
           countriesByCode[columns[8]],
           adminRegionsByCode[`${columns[8]}.${columns[10]}`]
         );

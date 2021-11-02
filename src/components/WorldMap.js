@@ -81,7 +81,6 @@ const MemoGeographies = memo(() => (
   <Geographies geography={GEO_JSON}>
     {({ geographies }) =>
       geographies.map((geo) => {
-        console.log(geo);
         return (
           <Geography
             key={geo.rsmKey}
@@ -108,15 +107,11 @@ const WorldMap = () => {
   let [scale, setScale] = useState(1);
   let [tooltipContent, setTooltipContent] = useState("");
   let [isModalOpen, setIsModalOpen] = useState(false);
-  let [modalContent, setModalContent] = useState({});
+  let [modalCityInfo, setModalCityInfo] = useState({});
 
   const openModal = async (cityInfo) => {
-    const extract = await CityExtractFetcher.get(cityInfo);
-    const header =
-      cityInfo.displayName !== cityInfo.adminRegion
-        ? `${cityInfo.displayName}, ${cityInfo.adminRegion}`
-        : `${cityInfo.displayName}, ${cityInfo.country}`;
-    setModalContent({ header, extract });
+    const extractObj = await CityExtractFetcher.get(cityInfo);
+    setModalCityInfo({ ...cityInfo, ...extractObj });
     setIsModalOpen(true);
   };
 
@@ -144,8 +139,7 @@ const WorldMap = () => {
         {tooltipContent}
       </ReactTooltip>
       <CityModal
-        header={modalContent.header}
-        extract={modalContent.extract}
+        cityInfo={modalCityInfo}
         show={isModalOpen}
         onHide={() => setIsModalOpen(false)}
       />

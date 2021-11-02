@@ -14,12 +14,10 @@ const insertLineBreaks = (text) =>
 // officially the City of Chicago..."
 // -> "Chicago, officially the City of Chicago..."
 const cleanText = (text) => {
-  //console.log(text);
   const lines = text.split(". ");
   const firstLine = lines[0];
   let parens = firstLine.matchAll(/[()]/g);
 
-  console.log(parens);
   let parenCount = 0;
   let startIndex = -1;
   let endIndex = -1;
@@ -39,33 +37,34 @@ const cleanText = (text) => {
   }
 
   if (endIndex !== -1) {
-    console.log(firstLine);
     let newFirstLine =
       firstLine.slice(0, startIndex - 1).trim() + firstLine.slice(endIndex + 1);
     lines[0] = newFirstLine;
-    console.log(newFirstLine);
     return lines.join(". ");
   }
   return text;
 };
 
 class CityExtractFetcher {
-  static async get({ name, country, adminRegion }) {
+  static async get({ displayName, name, country, adminRegion }) {
     const pageId = await fetch(getPageIdsUrl(name))
       .then((response) => response.json())
       .then((data) => {
         if (data && data.query && data.query.search) {
           let maxScore = -1;
           let mostLikelyResult = undefined;
-          console.log(data.query.search);
           for (let result of data.query.search) {
             let score = 0;
             let title = result.title.toLowerCase();
             let lowerCName = name.toLowerCase();
-            if (title === lowerCName) {
+            let lowerCDisplayName = displayName.toLowerCase();
+            if (title === lowerCName || title === lowerCDisplayName) {
               score++;
             }
-            if (title.indexOf(lowerCName) !== 0) {
+            if (
+              title.indexOf(lowerCName) !== 0 &&
+              title.indexOf(lowerCDisplayName) !== 0
+            ) {
               score -= 2;
             }
             if (
@@ -99,16 +98,19 @@ class CityExtractFetcher {
       });
 
     if (pageId) {
-      console.log(pageId);
-      let extract = await fetch(getExtractUrl(pageId))
+      return await fetch(getExtractUrl(pageId))
         .then((response) => response.json())
-        .then((data) =>
-          data && data.query && data.query.pages
-            ? data.query.pages[0].extract
-            : null
-        );
-      extract = cleanText(extract);
-      return insertLineBreaks(extract);
+        .then((data) => {
+          if (data && data.query && data.query.pages) {
+            let page = data.query.pages[0];
+            return {
+              extract: insertLineBreaks(cleanText(page.extract)),
+              extractTitle: page.title,
+            };
+          } else {
+            return {};
+          }
+        });
     }
   }
 }

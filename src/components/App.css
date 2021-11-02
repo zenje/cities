@@ -5,6 +5,7 @@
   --bg-color-secondary: #171a24;
 
   --font-color: rgb(256, 256, 256, 0.8);
+  --font-color-secondary: #2a9d8f;
 }
 
 body {
@@ -41,6 +42,29 @@ body {
   background-color: var(--bg-color-secondary);
   opacity: 0.9;
   color: var(--font-color);
+}
+
+a.city-title-link {
+  transition: 0.3s ease-in;
+  cursor: pointer;
+  color: var(--font-color);
+  text-decoration: none;
+}
+
+a.city-title-link:hover {
+  color: var(--font-color-secondary);
+}
+
+a.read-more-link {
+  transition: 0.3s ease-in;
+  cursor: pointer;
+  color: var(--font-color);
+  text-decoration: underline;
+}
+
+a.read-more-link:hover {
+  color: var(--font-color-secondary);
+  text-decoration: none;
 }
 
 .city-tooltip {
