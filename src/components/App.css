@@ -17,6 +17,14 @@
   background: var(--highlight-color);
 }
 
+/* Disable scroll */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: "Overpass Mono", monospace;
   background-color: var(--bg-color-main);
@@ -32,6 +40,26 @@ body {
   color: var(--font-color);
 }
 
+button.toggle-button,
+button.toggle-button:focus,
+.world-map-container button.toggle-button:active {
+  transition: 0.3s ease-in;
+  z-index: 999;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 3rem;
+  background-color: var(--bg-color-secondary);
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+button.toggle-button:hover {
+  background-color: var(--highlight-color);
+  margin-right: 3.5rem;
+}
+
 .world-map-container {
   width: 100%;
   overflow: hidden;
@@ -39,18 +67,19 @@ body {
 
 .world-map {
   transition: 0.5s ease-in;
+  margin-top: -15vh;
 }
 
 @media screen and (max-width: 1200px) {
   .world-map {
-    width: calc(1.5 * 100vh);
-    margin-left: -50vh;
-    margin-top: -25vh;
+    margin-top: -5vh;
   }
 }
 @media screen and (max-width: 1024px) {
   .world-map {
     width: calc(1.75 * 100vh);
+    margin-left: -50vh;
+    margin-top: -25vh;
   }
 }
 @media screen and (max-width: 768px) {
@@ -79,6 +108,7 @@ a.city-title-link {
 
 a.city-title-link:hover {
   color: var(--font-color-secondary);
+  margin-left: 1rem;
 }
 
 a.read-more-link {
@@ -91,6 +121,7 @@ a.read-more-link {
 a.read-more-link:hover {
   color: var(--font-color-secondary);
   text-decoration: none;
+  margin-left: 0.5rem;
 }
 
 .city-tooltip {
@@ -119,7 +150,7 @@ a.read-more-link:hover {
   transition: opacity 500ms ease-in;
 }
 
-/************* NOT CURRENTLY USED ***********/
+/************* NOT CURRENTLY USED **************/
 
 .city-marker-enter {
   opacity: 0.01;

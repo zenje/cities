@@ -3,7 +3,7 @@ import { hasFlag } from "country-flag-icons";
 import getUnicodeFlagIcon from "country-flag-icons/unicode";
 
 import Modal from "./InfoModal";
-import { RESPONSE_ERROR } from "../constants";
+import { RESPONSE_ERROR, EXTRACT_ERROR_MSG } from "../constants";
 
 const getHeader = (cityInfo) => {
   const { adminRegion, country, countryCode, displayName, extractTitle } =
@@ -47,7 +47,7 @@ const openInNewTab = (url) => {
 const getExtractContent = (cityInfo) => {
   const { extract, extractTitle, response } = cityInfo;
   if (response === RESPONSE_ERROR) {
-    return <>Error: Failed to fetch city info.</>;
+    return <>{EXTRACT_ERROR_MSG}</>;
   }
 
   const url = `https://en.wikipedia.org/wiki/${extractTitle}`;

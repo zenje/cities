@@ -16,3 +16,5 @@ export const MARKER_PROPERTIES = {
   FILL_OPACITY: 0.3,
   STROKE_WIDTH: "0.5",
 };
+
+export const EXTRACT_ERROR_MSG = "ERROR: Failed to fetch city info.";

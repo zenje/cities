@@ -9,6 +9,7 @@ import ReactTooltip from "react-tooltip";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { CityFetcher } from "../utils/fetchCities";
 import { CityExtractFetcher } from "../utils/fetchCityExtract";
+import { nFormatter } from "../utils/nFormatter";
 
 import CityMarker from "./CityMarker";
 import CityModal from "./CityModal";
@@ -77,7 +78,7 @@ const renderMarkers = (
 
 // wrap Geographies in a memoized component to prevent re-render after other
 // state changes (e.g., loading tooltip (setTooltipContent), zooming (setScale))
-const MemoGeographies = memo(() => (
+const MemoGeographies = memo(({ isCityMode, setTooltipContent }) => (
   <Geographies geography={GEO_JSON}>
     {({ geographies }) =>
       geographies.map((geo) => {
@@ -90,10 +91,29 @@ const MemoGeographies = memo(() => (
             strokeWidth="0.5"
             strokeLinecap="round"
             style={{
-              default: { outline: "none" },
-              hover: { outline: "none" },
+              default: { outline: "none", transition: "0.3s ease-in" },
+              hover: {
+                outline: "none",
+                fill: !isCityMode ? "rgb(42, 157, 143, 0.8)" : "transparent",
+                transition: "0.3s ease-in",
+              },
               pressed: { outline: "none" },
             }}
+            onMouseEnter={
+              !isCityMode
+                ? () => {
+                    const { NAME, POP_EST } = geo.properties;
+                    setTooltipContent(`${NAME}<br />${nFormatter(POP_EST, 1)}`);
+                  }
+                : null
+            }
+            onMouseLeave={
+              !isCityMode
+                ? () => {
+                    setTooltipContent("");
+                  }
+                : null
+            }
             tabIndex={-1}
           />
         );
@@ -102,14 +122,14 @@ const MemoGeographies = memo(() => (
   </Geographies>
 ));
 
-const WorldMap = () => {
+const WorldMap = ({ isCityMode }) => {
   const [showMap, setShowMap] = useState(false);
   const [markers, setMarkers] = useState([]);
   const [scale, setScale] = useState(1);
   const [tooltipContent, setTooltipContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalCityInfo, setModalCityInfo] = useState({});
-  const nodeRef = useRef(null);
+  const nodeRef = useRef(null); // reference to DOM element to transition
 
   const openModal = async (cityInfo) => {
     const extractObj = await CityExtractFetcher.get(cityInfo);
@@ -145,13 +165,17 @@ const WorldMap = () => {
                       setScale(args[0].zoom);
                     }}
                   >
-                    <MemoGeographies />
-                    {renderMarkers(
-                      markers,
-                      scale,
-                      setTooltipContent,
-                      openModal
-                    )}
+                    <MemoGeographies
+                      isCityMode={isCityMode}
+                      setTooltipContent={setTooltipContent}
+                    />
+                    {isCityMode &&
+                      renderMarkers(
+                        markers,
+                        scale,
+                        setTooltipContent,
+                        openModal
+                      )}
                   </ZoomableGroup>
                 </ComposableMap>
                 <ReactTooltip
