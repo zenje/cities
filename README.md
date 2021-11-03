@@ -7,6 +7,7 @@ View live on heroku: https://earth-cities.herokuapp.com/
 ## About
 
 ### Technologies
+
 - [React](https://reactjs.org/), [react-bootstrap](https://react-bootstrap.github.io/)
 - [react-simple-maps](https://www.react-simple-maps.io/), [react-tooltip](https://www.npmjs.com/package/react-tooltip) to render map and tooltip
 - [Wikipedia API](https://www.mediawiki.org/wiki/API:Main_page) for city info

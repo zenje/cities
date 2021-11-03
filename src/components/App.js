@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header"></header>
-      <div className="world-map">
+      <div className="world-map-container">
         <WorldMap />
       </div>
     </div>

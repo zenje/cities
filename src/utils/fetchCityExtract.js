@@ -1,3 +1,5 @@
+import { RESPONSE_ERROR } from "../constants";
+
 // To handle CORS: for anonymous requests, origin query string parameter can
 // be set to * which will allow requests from anywhere.
 const getPageIdsUrl = (name) =>
@@ -45,61 +47,74 @@ const cleanText = (text) => {
   return text;
 };
 
+const findMostLikelyResult = (data, cityInfo) => {
+  const { displayName, name, country, adminRegion } = cityInfo;
+  if (data && data.query && data.query.search) {
+    let maxScore = -1;
+    let mostLikelyResult = undefined;
+    for (let result of data.query.search) {
+      let score = 0;
+      let title = result.title.toLowerCase();
+      let lowerCName = name.toLowerCase();
+      let lowerCDisplayName = displayName.toLowerCase();
+      if (title === lowerCName || title === lowerCDisplayName) {
+        score++;
+      }
+      if (
+        title.indexOf(lowerCName) !== 0 &&
+        title.indexOf(lowerCDisplayName) !== 0
+      ) {
+        score--;
+      }
+      if (title.indexOf("school") > -1 || title.indexOf("university") > -1) {
+        score--;
+      }
+      if (
+        new RegExp(`${adminRegion}|${country}|(city)`, "i").test(result.title)
+      ) {
+        score += 2;
+      }
+      if (new RegExp("city", "i").test(result.snippet)) {
+        score++;
+      }
+      if (result.snippet.includes("refer")) {
+        score--;
+      }
+      if (score > maxScore) {
+        maxScore = score;
+        mostLikelyResult = result;
+      }
+    }
+    if (mostLikelyResult) {
+      return mostLikelyResult.pageid;
+    }
+  }
+};
+
 class CityExtractFetcher {
-  static async get({ displayName, name, country, adminRegion }) {
-    const pageId = await fetch(getPageIdsUrl(name))
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.query && data.query.search) {
-          let maxScore = -1;
-          let mostLikelyResult = undefined;
-          for (let result of data.query.search) {
-            let score = 0;
-            let title = result.title.toLowerCase();
-            let lowerCName = name.toLowerCase();
-            let lowerCDisplayName = displayName.toLowerCase();
-            if (title === lowerCName || title === lowerCDisplayName) {
-              score++;
-            }
-            if (
-              title.indexOf(lowerCName) !== 0 &&
-              title.indexOf(lowerCDisplayName) !== 0
-            ) {
-              score -= 2;
-            }
-            if (
-              title.indexOf("school") > -1 ||
-              title.indexOf("university") > -1
-            ) {
-              score--;
-            }
-            if (
-              new RegExp(`${adminRegion}|${country}|(city)`, "i").test(
-                result.title
-              )
-            ) {
-              score += 2;
-            }
-            if (new RegExp("city", "i").test(result.snippet)) {
-              score++;
-            }
-            if (result.snippet.includes("refer")) {
-              score--;
-            }
-            if (score > maxScore) {
-              maxScore = score;
-              mostLikelyResult = result;
-            }
-          }
-          if (mostLikelyResult) {
-            return mostLikelyResult.pageid;
-          }
+  static async get(cityInfo) {
+    const pageId = await fetch(getPageIdsUrl(cityInfo.name))
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Something went wrong");
         }
+      })
+      .then((data) => findMostLikelyResult(data, cityInfo))
+      .catch((error) => {
+        console.log(error);
       });
 
     if (pageId) {
       return await fetch(getExtractUrl(pageId))
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error("Something went wrong");
+          }
+        })
         .then((data) => {
           if (data && data.query && data.query.pages) {
             let page = data.query.pages[0];
@@ -107,11 +122,16 @@ class CityExtractFetcher {
               extract: insertLineBreaks(cleanText(page.extract)),
               extractTitle: page.title,
             };
-          } else {
-            return {};
           }
+        })
+        .catch((error) => {
+          console.log(error);
         });
     }
+
+    return {
+      response: RESPONSE_ERROR,
+    };
   }
 }
 

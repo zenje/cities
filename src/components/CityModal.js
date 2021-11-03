@@ -3,11 +3,14 @@ import { hasFlag } from "country-flag-icons";
 import getUnicodeFlagIcon from "country-flag-icons/unicode";
 
 import Modal from "./InfoModal";
+import { RESPONSE_ERROR } from "../constants";
 
 const getHeader = (cityInfo) => {
   const { adminRegion, country, countryCode, displayName, extractTitle } =
     cityInfo;
-  const url = `https://en.wikipedia.org/wiki/${extractTitle}`;
+  const url = extractTitle
+    ? `https://en.wikipedia.org/wiki/${extractTitle}`
+    : undefined;
   const flag = hasFlag(countryCode) ? getUnicodeFlagIcon(countryCode) : "";
   const showAdminRegion = adminRegion && displayName !== adminRegion;
   let header = showAdminRegion ? (
@@ -15,7 +18,7 @@ const getHeader = (cityInfo) => {
       <a
         className="city-title-link"
         href="/#"
-        onClick={() => openInNewTab(url)}
+        onClick={url ? () => openInNewTab(url) : null}
       >{`${displayName}, ${adminRegion}`}</a>
       <br />
       <h6>
@@ -28,7 +31,7 @@ const getHeader = (cityInfo) => {
       <a
         className="city-title-link"
         href="/#"
-        onClick={() => openInNewTab(url)}
+        onClick={url ? () => openInNewTab(url) : null}
       >{`${displayName}, ${country}`}</a>
       {flag && ` ${flag}`}
     </>
@@ -42,7 +45,11 @@ const openInNewTab = (url) => {
 };
 
 const getExtractContent = (cityInfo) => {
-  const { extract, extractTitle } = cityInfo;
+  const { extract, extractTitle, response } = cityInfo;
+  if (response === RESPONSE_ERROR) {
+    return <>Error: Failed to fetch city info.</>;
+  }
+
   const url = `https://en.wikipedia.org/wiki/${extractTitle}`;
   return (
     <>

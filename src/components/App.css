@@ -6,6 +6,15 @@
 
   --font-color: rgb(256, 256, 256, 0.8);
   --font-color-secondary: #2a9d8f;
+
+  --highlight-color: #10497e;
+}
+
+::selection {
+  background: var(--highlight-color);
+}
+::-moz-selection {
+  background: var(--highlight-color);
 }
 
 body {
@@ -23,10 +32,27 @@ body {
   color: var(--font-color);
 }
 
-.world-map {
+.world-map-container {
   width: 100%;
+  overflow: hidden;
 }
 
+.world-map {
+  transition: 0.5s ease-in;
+}
+
+@media screen and (max-width: 1200px) {
+  .world-map {
+    width: calc(1.5 * 100vh);
+    margin-left: -50vh;
+    margin-top: -25vh;
+  }
+}
+@media screen and (max-width: 1024px) {
+  .world-map {
+    width: calc(1.75 * 100vh);
+  }
+}
 @media screen and (max-width: 768px) {
   .world-map {
     width: calc(2 * 100vh);
@@ -74,6 +100,26 @@ a.read-more-link:hover {
 .city-circle {
   cursor: pointer;
 }
+
+.world-map-enter {
+  opacity: 0.01;
+}
+
+.world-map-enter.world-map-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.world-map-exit {
+  opacity: 1;
+}
+
+.world-map-exit.world-map-exit-active {
+  opacity: 0.01;
+  transition: opacity 500ms ease-in;
+}
+
+/************* NOT CURRENTLY USED ***********/
 
 .city-marker-enter {
   opacity: 0.01;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 import {
   ComposableMap,
   ZoomableGroup,
@@ -103,11 +103,13 @@ const MemoGeographies = memo(() => (
 ));
 
 const WorldMap = () => {
-  let [markers, setMarkers] = useState([]);
-  let [scale, setScale] = useState(1);
-  let [tooltipContent, setTooltipContent] = useState("");
-  let [isModalOpen, setIsModalOpen] = useState(false);
-  let [modalCityInfo, setModalCityInfo] = useState({});
+  const [showMap, setShowMap] = useState(false);
+  const [markers, setMarkers] = useState([]);
+  const [scale, setScale] = useState(1);
+  const [tooltipContent, setTooltipContent] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalCityInfo, setModalCityInfo] = useState({});
+  const nodeRef = useRef(null);
 
   const openModal = async (cityInfo) => {
     const extractObj = await CityExtractFetcher.get(cityInfo);
@@ -116,6 +118,8 @@ const WorldMap = () => {
   };
 
   useEffect(() => {
+    setShowMap(true); // true for transition fade on enter
+
     // useEffect is synchronous, call async function within useEffect to fetch
     (async () => {
       let cities = await CityFetcher.get();
@@ -124,26 +128,50 @@ const WorldMap = () => {
   }, []);
 
   return (
-    <div data-tip="">
-      <ComposableMap>
-        <ZoomableGroup
-          onMoveEnd={(...args) => {
-            setScale(args[0].zoom);
-          }}
+    <>
+      <div data-tip="" className="world-map">
+        <CSSTransition
+          in={showMap}
+          nodeRef={nodeRef}
+          classNames="world-map"
+          timeout={500}
         >
-          <MemoGeographies />
-          {renderMarkers(markers, scale, setTooltipContent, openModal)}
-        </ZoomableGroup>
-      </ComposableMap>
-      <ReactTooltip className="city-tooltip" multiline={true} html={true}>
-        {tooltipContent}
-      </ReactTooltip>
+          <>
+            {showMap && (
+              <div ref={nodeRef}>
+                <ComposableMap>
+                  <ZoomableGroup
+                    onMoveEnd={(...args) => {
+                      setScale(args[0].zoom);
+                    }}
+                  >
+                    <MemoGeographies />
+                    {renderMarkers(
+                      markers,
+                      scale,
+                      setTooltipContent,
+                      openModal
+                    )}
+                  </ZoomableGroup>
+                </ComposableMap>
+                <ReactTooltip
+                  className="city-tooltip"
+                  multiline={true}
+                  html={true}
+                >
+                  {tooltipContent}
+                </ReactTooltip>
+              </div>
+            )}
+          </>
+        </CSSTransition>
+      </div>
       <CityModal
         cityInfo={modalCityInfo}
         show={isModalOpen}
         onHide={() => setIsModalOpen(false)}
       />
-    </div>
+    </>
   );
 };
 
