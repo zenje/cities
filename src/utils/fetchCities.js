@@ -11,7 +11,8 @@ class CityInfo {
     coordinates,
     countryCode,
     country,
-    adminRegion
+    adminRegion,
+    isCapital
   ) {
     this.id = id;
     this.name = name;
@@ -21,6 +22,7 @@ class CityInfo {
     this.countryCode = countryCode;
     this.country = country;
     this.adminRegion = adminRegion;
+    this.isCapital = isCapital;
   }
 }
 
@@ -30,41 +32,62 @@ const getFileLines = async (fileName) => {
     .then((text) => text.split(/\n/).filter((line) => /^[^#]/.test(line)));
 };
 
+const checkCapitalExceptions = (countryCode, adminCode) => {
+  return countryCode === "US" ? adminCode === "DC" : true;
+};
+
 class CityFetcher {
   static async get() {
     const countriesByCode = {};
-    let countryLines = await getFileLines(COUNTRY_DATA);
+    const capitalsByCountryCode = {};
+    const countryLines = await getFileLines(COUNTRY_DATA);
 
     for (let line of countryLines) {
       let columns = line.split(/\t/);
-      countriesByCode[columns[0]] = columns[4];
+      let countryCode = columns[0].trim();
+      let countryName = columns[4].trim();
+      let capital = columns[5].trim();
+      countriesByCode[countryCode] = countryName;
+      if (capital) {
+        let c = `${capital}-${countryCode}`.toLowerCase();
+        capitalsByCountryCode[c] = countryCode;
+      }
     }
 
     const adminRegionsByCode = {};
-    let adminLines = await getFileLines(ADMIN_DATA);
+    const adminLines = await getFileLines(ADMIN_DATA);
 
     for (let line of adminLines) {
       let columns = line.split(/\t/);
       adminRegionsByCode[columns[0]] = columns[2];
     }
 
-    let cityLines = await getFileLines(CITY_DATA);
+    const cityLines = await getFileLines(CITY_DATA);
 
     let cities = {};
     for (let line of cityLines) {
-      let columns = line.split(/\t/);
+      const columns = line.split(/\t/);
       if (columns) {
         // asciiname, name of geographical point in plain ascii characters
-        let city = columns[2];
-        cities[city] = new CityInfo(
+        const cityName = columns[2];
+        const countryCode = columns[8];
+        const adminCode = columns[10];
+        const adminRegion = adminRegionsByCode[`${countryCode}.${adminCode}`];
+        const isCapital =
+          capitalsByCountryCode.hasOwnProperty(
+            `${cityName}-${countryCode}`.toLowerCase()
+          ) && checkCapitalExceptions(countryCode, adminCode);
+        const key = `${cityName}-${adminRegion}`;
+        cities[key] = new CityInfo(
           columns[0],
-          columns[2],
+          cityName,
           columns[1],
           columns[14],
           [columns[5], columns[4]],
-          columns[8],
-          countriesByCode[columns[8]],
-          adminRegionsByCode[`${columns[8]}.${columns[10]}`]
+          countryCode,
+          countriesByCode[countryCode],
+          adminRegion,
+          isCapital
         );
       }
     }

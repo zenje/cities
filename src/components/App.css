@@ -40,24 +40,45 @@ body {
   color: var(--font-color);
 }
 
-button.toggle-button,
-button.toggle-button:focus,
-.world-map-container button.toggle-button:active {
-  transition: 0.3s ease-in;
+.toggle-buttons-container {
   z-index: 999;
   position: absolute;
   bottom: 0;
   right: 0;
   margin: 3rem;
+}
+
+.world-map-container button.toggle-button,
+.world-map-container button.toggle-button:focus,
+.world-map-container button.toggle-button:active {
+  transition: 0.3s ease-in;
   background-color: var(--bg-color-secondary);
   outline: none;
   box-shadow: none;
   border: none;
+  margin: 0.5rem;
+  font-weight: bold;
 }
 
-button.toggle-button:hover {
+.world-map-container button.toggle-button:hover {
   background-color: var(--highlight-color);
-  margin-right: 3.5rem;
+}
+
+.world-map-container button.country-city-mode-button {
+  width: 10rem;
+}
+
+.world-map-container button.show-capitals-button,
+.world-map-container button.show-capitals-button:active {
+  opacity: 1;
+  margin-right: 0;
+  color: var(--font-color-secondary);
+  font-weight: normal;
+}
+
+.world-map-container button.show-capitals-button-hidden {
+  opacity: 0;
+  margin-right: 5rem;
 }
 
 .world-map-container {

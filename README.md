@@ -1,6 +1,6 @@
 # earth-cities
 
-React app that displays cities of Earth on a map! Click on cities to learn more.
+React app that displays most populated cities of Earth on a map! City markers are proportional to their relative populations. Click on cities to learn more.
 
 View live on heroku: https://earth-cities.herokuapp.com/
 

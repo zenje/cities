@@ -19,62 +19,62 @@ const getMarkers = (setMarkers, cities) => {
   if (cities) {
     // filter out cities with population < 50000 to optimize rendering
     let markers = Object.values(cities).filter(
-      (city) => city.population >= 50000
+      (city) => city.population >= 50000 || city.isCapital
     );
     setMarkers(markers);
   }
 };
 
-const renderMarkers = (
-  markers,
-  scale,
-  setTooltipContent,
-  openModal,
-  withTransition = false
-) => {
-  if (markers) {
-    if (withTransition) {
-      // transitions are non-performant, make withTransition = false for now
-      return (
-        <TransitionGroup component={null}>
-          {markers
-            .filter((city) => city.population > 1000000 / scale)
-            .map((city) => (
-              <CSSTransition
-                key={city.id}
-                classNames="city-marker"
-                timeout={500}
-              >
+const Markers = memo(
+  ({
+    markers,
+    markerFilterFn,
+    setTooltipContent,
+    openModal,
+    withTransition = false,
+  }) => {
+    if (markers) {
+      if (withTransition) {
+        // transitions are non-performant, make withTransition = false for now
+        return (
+          <TransitionGroup component={null}>
+            {markers
+              .filter((city) => markerFilterFn(city))
+              .map((city) => (
+                <CSSTransition
+                  key={city.id}
+                  classNames="city-marker"
+                  timeout={500}
+                >
+                  <CityMarker
+                    key={city.id}
+                    info={city}
+                    setTooltipContent={setTooltipContent}
+                    openModal={openModal}
+                  />
+                </CSSTransition>
+              ))}
+          </TransitionGroup>
+        );
+      } else {
+        return (
+          <>
+            {markers
+              .filter((city) => markerFilterFn(city))
+              .map((city) => (
                 <CityMarker
                   key={city.id}
                   info={city}
-                  scale={scale}
                   setTooltipContent={setTooltipContent}
                   openModal={openModal}
                 />
-              </CSSTransition>
-            ))}
-        </TransitionGroup>
-      );
-    } else {
-      return (
-        <>
-          {markers
-            .filter((city) => city.population > 1000000 / scale)
-            .map((city) => (
-              <CityMarker
-                key={city.id}
-                info={city}
-                scale={scale}
-                setTooltipContent={setTooltipContent}
-                openModal={openModal}
-              />
-            ))}
-        </>
-      );
+              ))}
+          </>
+        );
+      }
     }
   }
-};
+);
 
 // wrap Geographies in a memoized component to prevent re-render after other
 // state changes (e.g., loading tooltip (setTooltipContent), zooming (setScale))
@@ -122,7 +122,7 @@ const MemoGeographies = memo(({ isCityMode, setTooltipContent }) => (
   </Geographies>
 ));
 
-const WorldMap = ({ isCityMode }) => {
+const WorldMap = ({ isCityMode, showOnlyCapitals }) => {
   const [showMap, setShowMap] = useState(false);
   const [markers, setMarkers] = useState([]);
   const [scale, setScale] = useState(1);
@@ -147,6 +147,10 @@ const WorldMap = ({ isCityMode }) => {
     })();
   }, []);
 
+  const markerFilterFn = showOnlyCapitals
+    ? (city) => city.isCapital
+    : (city) => city.population > 1000000 / scale;
+
   return (
     <>
       <div data-tip="" className="world-map">
@@ -169,13 +173,14 @@ const WorldMap = ({ isCityMode }) => {
                       isCityMode={isCityMode}
                       setTooltipContent={setTooltipContent}
                     />
-                    {isCityMode &&
-                      renderMarkers(
-                        markers,
-                        scale,
-                        setTooltipContent,
-                        openModal
-                      )}
+                    {isCityMode && (
+                      <Markers
+                        markers={markers}
+                        markerFilterFn={markerFilterFn}
+                        setTooltipContent={setTooltipContent}
+                        openModal={openModal}
+                      />
+                    )}
                   </ZoomableGroup>
                 </ComposableMap>
                 <ReactTooltip
